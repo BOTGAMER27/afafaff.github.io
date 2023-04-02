@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Music Player with Chat</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div id="player"></div>
+    <div id="chat">
+        <div id="messages"></div>
+        <input type="text" id="messageInput">
+        <button type="button" id="sendButton">Send</button>
+    </div>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        // YouTube API code goes here
+        // ...
+        
+        // Chat code starts here
+        var messageInput = document.getElementById('messageInput');
+        var sendButton = document.getElementById('sendButton');
+        var messagesDiv = document.getElementById('messages');
+        var lastMessageId = -1;
+        
+        sendButton.addEventListener('click', function() {
+            var message = messageInput.value;
+            if (message) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/send_message',
+                    data: {message: message},
+                    success: function(response) {
+                        messageInput.value = '';
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+            }
+        });
+        
+        function receiveMessages() {
+            $.ajax({
+                type: 'GET',
+                url: '/get_messages',
+                data: {lastMessageId: lastMessageId},
+                success: function(response) {
+                    response.messages.forEach(function(message) {
+                        var messageDiv = document.createElement('div');
+                        messageDiv.innerHTML = message.content;
+                        messagesDiv.appendChild(messageDiv);
+                        lastMessageId = message.id;
+                    });
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        }
+        setInterval(receiveMessages, 1000);
+    </script>
+</body>
+</html>
